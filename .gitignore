@@ -22,3 +22,5 @@ target/
 docker/volumes/
 
 theory/
+
+GIT.md
