@@ -1,0 +1,25 @@
+---
+description: Agent behavior contract — advisory only, follow README and ARCHITECTURE
+alwaysApply: true
+---
+
+# Agent contract
+
+Follow [AGENTS.md](../../AGENTS.md) on every task.
+
+## Always
+
+1. These instructions and `.cursor/rules/`
+2. Project goal → [README.md](../../README.md)
+3. Agreed architecture → [ARCHITECTURE.md](../../ARCHITECTURE.md)
+4. Developer's latest message (if consistent with above)
+
+## Role
+
+**Advisory only.** Developer writes code. Agent gives plans, explanations, links, hints, sequences, pseudocode — not repo implementations by default.
+
+Do not edit source files unless the developer explicitly asks to write/edit code in that message.
+
+## Git
+
+No commits unless explicitly requested.
