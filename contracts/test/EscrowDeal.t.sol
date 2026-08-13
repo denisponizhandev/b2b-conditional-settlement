@@ -9,6 +9,7 @@ import { MockERC20 } from "../src/mocks/MockERC20.sol";
 contract EscrowDealTest is Test {
     MockERC20 public token;
 
+    address public admin = makeAddr("admin");
     address public payer = makeAddr("payer");
     address public payee = makeAddr("payee");
     address public approver = makeAddr("approver");
@@ -36,6 +37,7 @@ contract EscrowDealTest is Test {
 
     function _deployDeal(uint256[] memory amounts) internal returns (EscrowDeal deal) {
         deal = new EscrowDeal(
+            admin,
             approver,
             payer,
             payee,

@@ -33,6 +33,7 @@ contract EscrowDeal is IEscrowDeal, AccessControl, ReentrancyGuard {
     IEscrowDeal.DealState public state;
 
     constructor(
+        address _admin,
         address _approver, 
         address _payer, 
         address _payee, 
@@ -71,7 +72,7 @@ contract EscrowDeal is IEscrowDeal, AccessControl, ReentrancyGuard {
         milestoneCount = uint16(_milestoneAmounts.length);
         state = IEscrowDeal.DealState.Draft;
 
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(APPROVER_ROLE, approver);
         
     }
