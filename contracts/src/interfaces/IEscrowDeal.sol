@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.36;
 
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 interface IEscrowDeal {
     enum DealState {
         Draft,
@@ -31,13 +33,13 @@ interface IEscrowDeal {
     function payer() external view returns (address);
     function payee() external view returns (address);
     function approver() external view returns (address);
-    function token() external view returns (address);
+    function token() external view returns (IERC20);
     function retentionBps() external view returns (uint16);
     function fundedAmount() external view returns (uint256);
-    function milestoneCount() external view returns (uint8);
-    function getMilestone(uint8 index) external view returns (Milestone memory);
+    function milestoneCount() external view returns (uint16);
+    function getMilestone(uint16 _index) external view returns (Milestone memory);
     function dealId() external view returns (bytes32);
 
-    function fund(uint256 amount) external;
-    function releaseMilestone(uint8 index) external;
+    function fund(uint256 _amount) external;
+    function releaseMilestone(uint16 _index) external;
 }
