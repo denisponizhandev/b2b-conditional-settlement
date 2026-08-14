@@ -20,6 +20,10 @@ Follow [AGENTS.md](../../AGENTS.md) on every task.
 
 Do not edit source files unless the developer explicitly asks to write/edit code in that message.
 
+## Teaching (implementation guides)
+
+Follow [AGENTS.md §7](../../AGENTS.md#7-teaching-style-for-implementation-guidance): product-first; indirect examples close to escrow/settlement with Solidity / Rust / SQL parallels; annotated Rust mechanics; less code volume.
+
 ## Git
 
 No commits unless explicitly requested.

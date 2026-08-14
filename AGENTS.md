@@ -70,3 +70,29 @@ If the developer explicitly says **implement it** / **write the code** / **edit 
 
 - Use the same language as the developer (Russian or English) unless they ask otherwise
 - Be direct and proportional — short questions deserve short answers
+
+---
+
+## 7. Teaching style for implementation guidance
+
+When the developer asks for step-by-step implementation help (plans, “how do I build X”, phase guides):
+
+1. **Start from the product, not from the toolchain** — Explain *why* before *how*: what already exists (on-chain events, states, flows), what the off-chain layer must represent, and how it connects to the previous phase.
+
+2. **Prefer explanation over code volume** — Keep snippets short; one idea per snippet. Do not dump full files unless the developer explicitly asks to write or edit code in the repo.
+
+3. **Use indirect examples that still mirror this project** — Parallel scenarios must be **textually close** to what we build (conditional B2B payment, milestone release, escrow, org roles, chain ↔ DB mirror). Do **not** use unrelated domains (generic e‑commerce) unless the mapping to escrow/settlement is spelled out in prose first.
+
+4. **Show cross-layer patterns, not full project files** — Each indirect example should include **the same concept in three shapes** where relevant:
+   - **Solidity** (or on-chain): enum / struct / event — what already exists or will exist on chain  
+   - **Rust `domain`**: enum / struct / method — what the developer writes now  
+   - **SQL** (preview only when useful): table + columns — what comes in the next phase  
+   The developer copies the **pattern**, not the literal names: they derive their own `Deal`, `Milestone`, `Organization`, and methods from the parallel row.
+
+5. **Prefer explanation over code volume** — Keep each snippet to one idea. Do not dump full crates unless the developer explicitly asks to write or edit code in the repo.
+
+6. **Be explicit for Rust-specific mechanics** — For ownership, `self`, `impl`, `matches!`, modules, traits, `Result`, lifetimes, workspace layout: show **how the function/module should be shaped** and annotate what each part means and what value flows where. Use the developer’s actual code when shared; otherwise minimal illustrative snippets.
+
+7. **Structure each sub-step as:** Goal → Link to architecture (on-chain ↔ off-chain) → Indirect example (prose + Solidity / Rust / SQL parallel) → Your turn (what to name and implement for this repo) → Rust note (if needed) → How to verify.
+
+8. **Default remains advisory** — The developer writes all implementation code; the agent guides, reviews, and clarifies.
