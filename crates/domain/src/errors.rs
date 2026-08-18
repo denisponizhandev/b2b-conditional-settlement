@@ -1,6 +1,6 @@
 use thiserror::Error;
 use crate::types::{DealStatus};
-yt
+
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum DomainError {
 
