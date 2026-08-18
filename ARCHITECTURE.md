@@ -342,4 +342,130 @@ Track decisions here as they are made:
 
 ---
 
-*Construction is a use case. The product is the platform.*
+## 14. Production credibility — how the finished platform must look
+
+This section captures **quality bar and engineering signals** for the portfolio deliverable.  
+Goal: the result must read as **institutional-grade settlement infrastructure**, not a thin AI-generated demo.
+
+**Important distinction:**
+
+| | Portfolio / Phase 1 MVP | Production (mainnet, real money) |
+|--|-------------------------|----------------------------------|
+| Scope | One vertical slice E2E + honest gaps | Full dispute, retention, compliance, audit |
+| Narrative | “Phase 1 core; roadmap to prod” | Audited, ops-ready, licensed where required |
+| Code | Disciplined closure on each layer | Same + formal audit + multisig + monitoring |
+
+The portfolio target is **production *shape*** and **production *discipline*** — not claiming mainnet readiness before audit and ops controls exist.
+
+### 14.1 What “production-grade” means here
+
+Credibility comes from **how the system is built**, not only from listing features:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. PRODUCT TRUST     pain → flow → policy → outcome        │
+│  2. SYSTEM DESIGN     SoR, idempotency, drift, boundaries   │
+│  3. ENGINEERING       tests, errors, migrations, logging      │
+│  4. OPERATIONS        docker, demo script, runbook, verify  │
+│  5. NARRATIVE         honest scope, ADRs, resolved open items │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Anti-patterns (must avoid):**
+
+- Happy path only; failure paths undocumented  
+- README / ARCHITECTURE diverge from repo layout and behavior  
+- Large volume of code with no E2E closure  
+- “Production-ready” language while dispute / retention / reconciliation are stubs  
+- Off-chain UUID and on-chain `dealId` unmapped (see §13)  
+- Indexer updates state without raw `chain_events` store  
+
+**Positive signals (must demonstrate):**
+
+- **Chain = settlement SoR**; PostgreSQL = operational mirror via indexer  
+- **Idempotent indexer** — duplicate events do not double-apply (`chain_events` uniqueness)  
+- **Domain invariants before chain tx** — e.g. `ensure_can_approve_release` in API path before calldata  
+- **Repository + ACL** — sqlx rows mapped to domain types; no business rules in HTTP handlers  
+- **Reconciliation** — detects escrow balance vs internal ledger drift  
+- **Two policy configs** on same engine (`construction` + `trade_import`) — platform, not one-off app  
+- **Reproducible demo** — `scripts/demo_*.sh` completes in < 5 minutes (README success criterion)
+
+### 14.2 Layer-specific production bar
+
+#### On-chain (`contracts/`)
+
+| Area | Portfolio minimum | Full production |
+|------|-------------------|-----------------|
+| Core flow | fund → ordered milestone release | Same |
+| Retention | Full lifecycle **or** explicit ADR defer with ticket | Hold → release after warranty rule |
+| Dispute / refund | Skeleton + documented gap **or** implemented paths | Freeze, arbiter, refund payer |
+| Access | EOA approver (Phase 1) | Session keys / multisig (Phase 2+) |
+| Token | Mock or Sepolia USDC; documented assumptions | Allowlist USDC/EURC; no fee-on-transfer |
+| Errors | Custom errors preferred over long revert strings | Same |
+| Tests | Unit + integration; **invariant / fuzz** on milestone order and balances | + formal audit, Slither clean |
+| Deploy | `deployments/sepolia.json`; Etherscan verify (nice) | Tagged releases, immutable factory versioning |
+
+Current Phase 1 contract is a **valid MVP slice**; production requires closing retention, dispute/refund, role hardening, and audit (see §8 Production column).
+
+#### Off-chain (`crates/`)
+
+| Area | Portfolio minimum | Full production |
+|------|-------------------|-----------------|
+| `domain` | Pure types + invariants; unit tests on error paths | + validation on aggregate construction |
+| `db` | Repository read/write; integration test roundtrip | + compile-time queries where practical |
+| `chain` | ABI bindings, event decode | + RPC failover, reorg policy |
+| `indexer` | Poll + N confirmations; idempotent writes | + WebSocket, DLQ, lag metrics |
+| `platform-api` | Deal CRUD; approve → calldata | + auth, rate limits, mTLS |
+| `reconciliation` | Worker detects drift; logs + DB row | + alerts, ERP hook |
+| Observability | Structured logs (`deal_id`, `tx_hash`) | Prometheus, on-call runbooks |
+
+#### Data (`migrations/`)
+
+- Migrations applied in order; FK and CHECK constraints enforced  
+- Minimum for Phase 1 closure: `organizations`, `deals`, `milestones`, `chain_events`, `ledger_entries`  
+- Phase 3 tables may exist early but must not block Phase 1 demo  
+
+### 14.3 Definition of done — portfolio “production shape”
+
+Use this checklist before calling the platform **finished for hiring / demo**.  
+Items marked **must** block “done”; **should** differentiate from generic AI repos.
+
+#### Must
+
+- [ ] **E2E vertical slice:** create deal → fund on Sepolia → approve → release → indexer updates DB → reconciliation passes  
+- [ ] **`chain_events`** table + idempotent indexer handler  
+- [ ] **Domain rules** enforced in API before returning calldata  
+- [ ] **`insert_deal` + `get_deal_by_id`** roundtrip integration test  
+- [ ] **`docker-compose`** + **`scripts/demo_construction.sh`** (< 5 min)  
+- [ ] **ARCHITECTURE.md matches** actual repo layout and flows  
+- [ ] **Two policy YAML configs** + README flow for each vertical (even if adapters mock)  
+- [ ] **“Production gaps”** section honest in README or here — no oversell  
+
+#### Should
+
+- [ ] Foundry invariant / fuzz tests (milestone order, fund amount = sum milestones)  
+- [ ] Retention implemented **or** ADR documenting defer + user-visible limitation  
+- [ ] Slither run; findings fixed or documented  
+- [ ] Resolved rows in §13 (deal ID mapping, indexer strategy, token choice)  
+- [ ] Structured logging on indexer and API  
+- [ ] One ADR example (e.g. `docs/adr/001-deal-id-mapping.md`)  
+
+#### Nice
+
+- [ ] Etherscan-verified contracts  
+- [ ] Read-only treasury dashboard API endpoints  
+- [ ] Webhook mock fired on `MilestoneReleased`  
+- [ ] Short recorded demo (construction E2E)  
+
+### 14.4 Priority order (quality over volume)
+
+When time is limited, optimize for **closure and trust signals**, not file count:
+
+1. **One E2E vertical slice** (construction) — highest credibility return  
+2. **Idempotency + reconciliation** — institutional data discipline  
+3. **Demo script + docker** — reproducibility  
+4. **Contract hardening** — custom errors, invariants, retention/dispute honesty  
+5. **Second vertical** (trade_import policy) — platform story  
+6. **UI** — optional; API + CLI sufficient for portfolio  
+
+**Rule:** prefer one completed slice over five half-built crates.

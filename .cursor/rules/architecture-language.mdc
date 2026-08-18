@@ -1,0 +1,74 @@
+---
+description: Fully explain design patterns before code work — not name-dropping alone
+alwaysApply: true
+---
+
+# Architecture vocabulary — full pattern explanations
+
+The developer learns **design-review language**, not only Rust/Solidity syntax.  
+**Naming a pattern is not enough** — explain it so the developer could defend the choice in an interview. **All explanations in Russian**; English only for term names and code identifiers ([AGENTS.md §10](../../AGENTS.md#10-communication)).
+
+## When to include pattern blocks
+
+**Include** before proposals, implementation, phase plans, or reviews when the message involves:
+
+- architecture shaping or subtask planning
+- a code request or post-implementation report
+- explaining how to build or structure something in the repo
+- walking through a flow (approve, fund, indexer, db, API)
+
+**Skip** for: git-only, pure theory with no engineering angle, one-line factual answers.
+
+## Full pattern block format (required for each central pattern)
+
+Use **all sections below** for each pattern (2–3 patterns max per answer).
+
+**Language:** section titles and all prose in **Russian**. Pattern name in **English** + Russian translation in parentheses on first mention in the thread. Code identifiers stay as in the repo (`insert_deal`, paths).
+
+---
+
+### **[Pattern name]** (EN — RU)
+
+**Что это:** 2–4 предложения простым языком. Какая идея / приём, не словарная статья — объясни коллеге, который термин слышит впервые.
+
+**Зачем / какую проблему решает:** Что ломается в реальных системах без этого паттерна. Привязка к боли (потеря данных, inconsistent state, утечка бизнес-правил и т.д.).
+
+**Почему здесь:** Почему паттерн подходит **этому** шагу settlement — связь с продуктом (escrow, milestone, org, chain mirror). Не абстрактное «best practice».
+
+**У нас в проекте:** Конкретный crate / файл / функция / таблица.
+
+**Без этого паттерна:** 1–2 конкретных сценария поломки **в нашей платформе**.
+
+**На design review:** Одна фраза, которую senior сказал бы вслух на встрече (можно по-русски или EN+RU — по смыслу).
+
+---
+
+## Example (quality bar — not copy-paste for every answer)
+
+### **Repository** (репозиторий)
+
+**Что это:** Отдельный объект, который знает, как загрузить и сохранить один aggregate (например `Deal`) в persistent storage. Снаружи просят `Deal`; репозиторий выполняет SQL, маппит строки и возвращает domain-типы. Бизнес-правила не живут в SQL-строках.
+
+**Зачем:** Без него SQL и форма таблиц протекают в API handlers и indexer — каждый слой заново пишет `SELECT … JOIN milestones`. Смена схемы ломает несколько мест сразу.
+
+**Почему здесь:** После fund on-chain платформе нужно **помнить** deal off-chain для API, audit и ERP. Repository — единственная «передняя дверь» в PostgreSQL для aggregate `Deal`.
+
+**У нас:** `crates/db` — `DealRepository`, `mapper.rs` (row → `Deal`).
+
+**Без этого:** Indexer пишет raw SQL; domain invariants обходятся на read; mapping UUID ↔ chain address расходится.
+
+**На design review:** «Вся persistence для Deal — через repository; domain не видит sqlx rows.»
+
+---
+
+## Rules
+
+- Tie every pattern to **this project’s** escrow/settlement story — not generic e-commerce
+- Prefer terms from [theory/ArchitecturePatterns.md](../../theory/ArchitecturePatterns.md) and [ARCHITECTURE.md](../../ARCHITECTURE.md)
+- **Never** replace the full block with a one-line “Pattern: X + Y”
+- After code: walkthrough + verify remain mandatory (AGENTS.md §3 Step E); pattern block can be shorter on repeat mentions **only if** the same pattern was fully explained earlier in the thread
+
+## Workflow placement
+
+- **Before code:** full pattern block(s) → proposal (что / зачем / alternatives / security)
+- **After code:** function walkthrough + verification; re-explain pattern only if a new pattern appears

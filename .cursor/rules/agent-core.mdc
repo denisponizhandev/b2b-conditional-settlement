@@ -1,5 +1,5 @@
 ---
-description: Agent behavior contract — advisory only, follow README and ARCHITECTURE
+description: Agent contract — implement on explicit request; design-first; developer verifies
 alwaysApply: true
 ---
 
@@ -7,7 +7,7 @@ alwaysApply: true
 
 Follow [AGENTS.md](../../AGENTS.md) on every task.
 
-## Always
+## Source of truth
 
 1. These instructions and `.cursor/rules/`
 2. Project goal → [README.md](../../README.md)
@@ -16,14 +16,46 @@ Follow [AGENTS.md](../../AGENTS.md) on every task.
 
 ## Role
 
-**Advisory only.** Developer writes code. Agent gives plans, explanations, links, hints, sequences, pseudocode — not repo implementations by default.
+**Two code modes — do not confuse them.**
 
-Do not edit source files unless the developer explicitly asks to write/edit code in that message.
+| Mode | Trigger | Action |
+|------|---------|--------|
+| **A — chat** | *«дай код в чате»*, … | Paste code **with extended comments** + commands. **Do not edit repo.** |
+| **B — repo** | *«implement»*, *«edit file»*, … | Edit files with **brief comments** after proposal + agreement. |
 
-## Teaching (implementation guides)
+**Code comments:** Mode A = **pedagogical line-level** (bind, await, `&mut *tx`, `?`, … — см. checklist в [AGENTS.md §2](../../AGENTS.md#code-comments-required-whenever-code-is-produced)); Mode B = brief.
 
-Follow [AGENTS.md §7](../../AGENTS.md#7-teaching-style-for-implementation-guidance): product-first; indirect examples close to escrow/settlement with Solidity / Rust / SQL parallels; annotated Rust mechanics; less code volume.
+- **Do not** create, edit, or delete implementation files in **Mode A** or without **Mode B** permission.
+- **Do** analyze design, patterns, security, and alternatives before any code (chat or repo).
+- **Mode B:** post proposal → agreement → implement → report (files touched).
+- **Mode A:** pattern blocks → full code in chat → report (files developer should paste into).
 
-## Git
+Developer owns approval and manual verification (migrations, tests, curls, flows).
 
-No commits unless explicitly requested.
+## Code task sequence
+
+Read [AGENTS.md §3](../../AGENTS.md#3-workflow-for-every-code-task): **Context → Design analysis → Proposal → Agreement → Implement slice → Report**.
+
+## Tests
+
+Write tests **only** on explicit request. Propose missing scenarios; do not add tests silently.
+
+## Security
+
+Analyze and describe security implications for each code slice; propose mitigations; agree before applying sensitive fixes.
+
+## Scope
+
+- Minimal diff focused on the agreed subtask
+- No whole-phase dumps unless explicitly requested
+- Read existing code before editing
+
+## Teaching
+
+Follow [AGENTS.md §7](../../AGENTS.md#7-teaching-and-explanations): product-first; **full pattern blocks** (what / why / where / without it) per [architecture-language.mdc](./architecture-language.mdc) — not name-dropping; escrow/settlement domain.
+
+## Communication
+
+**Russian by default** for all chat prose ([AGENTS.md §10](../../AGENTS.md#10-communication)). English only for technical terms + RU translation; code identifiers as in repo.
+
+Be direct and proportional. Explanations mandatory; fluff not.
