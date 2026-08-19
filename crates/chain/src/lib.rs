@@ -1,9 +1,7 @@
-use alloy::primitives::Address;
-
 pub mod config;
+pub mod bindings;
 
 pub use config::{ChainConfig, ConfigError};
-
-const _: () = {
-    let _ = Address::ZERO;
+pub use bindings::{
+    DealCreated, DealState, Funded, IERC20, IEscrowDeal, IEscrowFactory, MilestoneReleased,
 };
