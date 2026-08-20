@@ -2,7 +2,8 @@
 resolver = "2"
 members = [
     "crates/domain",
-    "crates/db"
+    "crates/db",
+    "crates/chain"
 ]
 
 [workspace.package]
@@ -12,6 +13,7 @@ license = "MIT"
 
 [workspace.dependencies]
 domain = { path = "crates/domain" }
+chain = { path = "crates/chain" }
 
 sqlx = { version = "0.8", default-features = false, features = [
     "postgres",
@@ -20,7 +22,17 @@ sqlx = { version = "0.8", default-features = false, features = [
     "macros",
 ] }
 
+alloy = { version = "2", default-features = false, features = [
+    "contract",
+    "provider-http",
+    "reqwest-rustls-tls",
+    "rpc-types",
+    "sol-types",
+] }
+
+serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 uuid = { version = "1", features = ["v4"] }
 thiserror = "2"
 dotenvy = "0.15"
+toml = "0.8"
