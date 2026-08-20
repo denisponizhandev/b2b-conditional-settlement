@@ -1,6 +1,7 @@
 pub mod config;
 pub mod bindings;
 pub mod events;
+pub mod client;
 
 pub use config::{ChainConfig, ConfigError};
 pub use bindings::{
@@ -8,3 +9,4 @@ pub use bindings::{
 };
 
 pub use events::{decode_log, ChainEvent, EventDecodeError};
+pub use client::{ChainClient, ClientError};

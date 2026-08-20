@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use alloy::primitives::Address;
@@ -53,9 +53,13 @@ impl ChainConfig {
         let rpc_url = Self::rpc_url_from_env()?;
 
         let config_path = std::env::var("CHAIN_CONFIG_PATH")
-            .unwrap_or_else(|_| "configs/chains/sepolia.toml".to_string());
-        
-        Self::from_toml_file(Path::new(&config_path), rpc_url)
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| {
+                Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("../../configs/chains/sepolia.toml")
+            });
+
+        Self::from_toml_file(&config_path, rpc_url)
     }
 
     pub fn from_toml_file(path: &Path, rpc_url: String) -> Result<Self, ConfigError> {
