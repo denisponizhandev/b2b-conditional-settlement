@@ -1,12 +1,16 @@
-pub mod config;
 pub mod bindings;
-pub mod events;
 pub mod client;
+pub mod config;
+pub mod error;
+pub mod events;
 
-pub use config::{ChainConfig, ConfigError};
 pub use bindings::{
     DealCreated, DealState, Funded, IERC20, IEscrowDeal, IEscrowFactory, MilestoneReleased,
 };
+pub use client::ChainClient;
+pub use config::ChainConfig;
+pub use error::ChainError;
+pub use events::{decode_log, ChainEvent};
 
-pub use events::{decode_log, ChainEvent, EventDecodeError};
-pub use client::{ChainClient, ClientError};
+pub use config::ConfigError;
+pub use events::EventDecodeError;
