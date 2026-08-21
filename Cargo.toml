@@ -3,7 +3,8 @@ resolver = "2"
 members = [
     "crates/domain",
     "crates/db",
-    "crates/chain"
+    "crates/chain",
+    "crates/indexer"
 ]
 
 [workspace.package]
@@ -14,6 +15,7 @@ license = "MIT"
 [workspace.dependencies]
 domain = { path = "crates/domain" }
 chain = { path = "crates/chain" }
+db = { path = "crates/db" }
 
 sqlx = { version = "0.8", default-features = false, features = [
     "postgres",

@@ -1,0 +1,16 @@
+[package]
+name = "indexer"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "indexer"
+path = "src/main.rs"
+
+[dependencies]
+chain = { workspace = true }
+db = { workspace = true }
+
+dotenvy = { workspace = true }
+sqlx = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
