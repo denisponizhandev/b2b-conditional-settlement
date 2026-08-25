@@ -2363,11 +2363,15 @@ dependencies = [
 name = "indexer"
 version = "0.1.0"
 dependencies = [
+ "alloy",
  "chain",
  "db",
  "dotenvy",
+ "serde_json",
  "sqlx",
+ "thiserror",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
