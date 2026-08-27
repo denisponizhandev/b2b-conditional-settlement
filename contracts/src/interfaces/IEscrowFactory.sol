@@ -25,6 +25,7 @@ interface IEscrowFactory {
         address _payee, 
         IERC20 _token, 
         uint16 _retentionBps, 
-        uint256[] memory _milestoneAmounts
+        uint256[] memory _milestoneAmounts,
+        bytes32 intentId
     ) external returns (IEscrowDeal deal);
 }

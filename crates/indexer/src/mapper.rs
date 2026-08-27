@@ -28,6 +28,7 @@ fn deal_created_payload(event: &chain::DealCreated) -> Value {
         "payee": address_hex(event.payee),
         "token": address_hex(event.token.into()),
         "retention_bps": u256_dec(event.retentionBps),
+        "intent_id": b256_hex(event.dealId)
     })
 }
 

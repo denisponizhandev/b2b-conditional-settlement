@@ -19,6 +19,7 @@ contract CreateDealScript is Script {
         uint256 mintAmount;
         uint256 fundTotal;
         uint256[] milestoneAmounts;
+        bytes32 intentId;
     }
 
     function run() external {
@@ -34,7 +35,7 @@ contract CreateDealScript is Script {
         _logResult(broadcaster, cfg, deal);
     }
 
-    function _loadConfig(address broadcaster) internal returns (DealConfig memory cfg) {
+    function _loadConfig(address broadcaster) internal view returns (DealConfig memory cfg) {
         cfg.dealAdmin = vm.envOr("DEAL_ADMIN", broadcaster);
         cfg.approver = vm.envAddress("DEAL_APPROVER");
         cfg.payer = vm.envAddress("DEAL_PAYER");
@@ -49,6 +50,7 @@ contract CreateDealScript is Script {
         cfg.milestoneAmounts[1] = milestone1;
         cfg.fundTotal = milestone0 + milestone1;
         cfg.mintAmount = vm.envOr("MINT_AMOUNT", cfg.fundTotal);
+        cfg.intentId = vm.envBytes32("DEAL_INTENT_ID");
     }
 
     function _mintAndCreateDeal(DealConfig memory cfg) internal returns (IEscrowDeal deal) {
@@ -64,7 +66,8 @@ contract CreateDealScript is Script {
             cfg.payee,
             IERC20(address(token)),
             cfg.retentionBps,
-            cfg.milestoneAmounts
+            cfg.milestoneAmounts,
+            cfg.intentId
         );
     }
 

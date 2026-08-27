@@ -15,7 +15,7 @@ impl DealRepository {
 
     pub async fn get_deal_by_id(&self, id: Uuid) -> Result<Deal, DbError> {
         let deal_row = sqlx::query(
-            "SELECT id, payer_org_id, payee_org_id, status, chain_address \
+            "SELECT id, payer_org_id, payee_org_id, status, intent_id, chain_address \
             FROM deals WHERE id = $1"
         )
         .bind(id)
@@ -23,7 +23,7 @@ impl DealRepository {
         .await?
         .ok_or(DbError::NotFound(id))?;
 
-        let (id, status, payer_org_id, payee_org_id, chain_address) = 
+        let (id, status, intent_id, payer_org_id, payee_org_id, chain_address) = 
             row_to_deal_fields(&deal_row)?;
        
         let milestones_rows = sqlx::query(
@@ -42,6 +42,7 @@ impl DealRepository {
         Ok(Deal::new(
             id, 
             status,
+            intent_id,
             milestones,
             payer_org_id, 
             payee_org_id,
@@ -53,13 +54,14 @@ impl DealRepository {
         let mut tx = self.pool.begin().await?;
 
         sqlx::query(
-            "INSERT INTO deals(id, payer_org_id, payee_org_id, status, chain_address) \
-            VALUES ($1, $2, $3, $4, $5)",
+            "INSERT INTO deals(id, payer_org_id, payee_org_id, status, intent_id, chain_address) \
+            VALUES ($1, $2, $3, $4, $5, $6)",
         )
         .bind(deal.id())
         .bind(deal.payer_org_id())
         .bind(deal.payee_org_id())
         .bind(status_to_str(deal.status()))
+        .bind(deal.intent_id())
         .bind(deal.chain_address())
         .execute(&mut *tx)
         .await?;

@@ -19,10 +19,15 @@ async fn insert_org(pool: &PgPool, id: Uuid, name: &str) {
         .expect("insert organozation");
 }
 
+fn random_intent_id() -> String {
+    format!("0x{}{}", Uuid::new_v4().simple(), Uuid::new_v4().simple())
+}
+
 fn sample_deal(deal_id: Uuid, payer_org_id: Uuid, payee_org_id: Uuid) -> Deal {
     Deal::new(
         deal_id,
         DealStatus::Funded,
+        random_intent_id(),
         vec![
             Milestone::new(0, 400_000, false),
             Milestone::new(1, 600_000, false)
@@ -46,11 +51,13 @@ async fn insert_and_load_deal_roundtrip() {
     insert_org(&pool, payee_org_id, "Payee Org").await;
 
     let deal = sample_deal(deal_id, payer_org_id, payee_org_id);
+    let expected_intent = deal.intent_id().clone();
 
     repo.insert_deal(&deal).await.expect("inster_deal");
 
     let loaded = repo.get_deal_by_id(deal_id).await.expect("get_deal_by_id");
 
+    assert_eq!(loaded.intent_id(), &expected_intent);
     assert_eq!(loaded.id(), deal_id);
     assert_eq!(loaded.status(), DealStatus::Funded);
     assert_eq!(loaded.payer_org_id(), payer_org_id);

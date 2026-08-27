@@ -37,6 +37,7 @@ impl Milestone {
 pub struct Deal {
     id: Uuid,
     status: DealStatus,
+    intent_id: String,
     milestones: Vec<Milestone>,
     payer_org_id: Uuid,
     payee_org_id: Uuid,
@@ -47,6 +48,7 @@ impl Deal {
     pub fn new(
         id: Uuid, 
         status: DealStatus, 
+        intent_id: String,
         milestones: Vec<Milestone>,
         payer_org_id: Uuid,
         payee_org_id: Uuid,
@@ -55,6 +57,7 @@ impl Deal {
         Deal {
             id,
             status,
+            intent_id,
             milestones,
             payer_org_id,
             payee_org_id,
@@ -64,6 +67,7 @@ impl Deal {
 
     pub fn id(&self) -> Uuid { self.id }
     pub fn status(&self) -> DealStatus { self.status }
+    pub fn intent_id(&self) -> &String { &self.intent_id }
     pub fn milestones(&self) -> &[Milestone] { &self.milestones }
     pub fn payer_org_id(&self) -> Uuid { self.payer_org_id }
     pub fn payee_org_id(&self) -> Uuid { self.payee_org_id }
@@ -143,14 +147,20 @@ mod tests {
         assert!(!DealStatus::Draft.can_approve_release());
     }
 
-    fn test_deal(status: DealStatus, milestones: Vec<Milestone>) -> Deal {
+    fn test_deal(
+        status: DealStatus, 
+        milestones: Vec<Milestone>
+    ) -> Deal {
         let deal_id = Uuid::new_v4();
         let payer_id = Uuid::new_v4();
         let payee_id = Uuid::new_v4();
 
+        let intent_id = String::from("0x0000000000000000000000000000000000000000000000000000000000000001");
+
         Deal::new(
             deal_id, 
             status, 
+            intent_id,
             milestones,
             payer_id,
             payee_id,
