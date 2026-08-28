@@ -14,5 +14,8 @@ pub enum DbError {
     InvalidAmount,
 
     #[error(transparent)]
-    Sqlx(#[from] sqlx::Error)
+    Sqlx(#[from] sqlx::Error),
+
+    #[error("milestone index out of range: {0}")]
+    InvalidMilestoneIndex(String)
 }

@@ -1,7 +1,7 @@
 {
   "chainId": 11155111,
   "dealCreator": "0xB9d11e7AaA0363cfd8904bE23D9CE821E82Aeeef",
-  "escrowFactory": "",
+  "escrowFactory": "0x874DCA353da8C07ab60341BF42312780F19B29Dd",
   "factoryAdmin": "0xB9d11e7AaA0363cfd8904bE23D9CE821E82Aeeef",
-  "mockToken": ""
+  "mockToken": "0x00aA1a5D9f4e4e502EF95F66F373cc5D4A565504"
 }

@@ -43,13 +43,23 @@ impl ChainEventRepository {
         }
     }
 
+    pub fn pool(&self) -> &PgPool {
+        &self.pool
+    }
+
     // idempotent, true = new row
-    pub async fn insert_if_new(&self, new_event: &NewChainEvent) -> Result<bool, DbError> {
+    pub async fn insert_if_new<'e, E>(
+        &self, 
+        executor: E,
+        new_event: &NewChainEvent
+    ) -> Result<bool, DbError> 
+    where 
+        E: sqlx::Executor<'e, Database = sqlx::Postgres>
+    {
         let result = sqlx::query(
             "INSERT INTO chain_events(id, chain_id, block_number, tx_hash, log_index, event_type, deal_id, contract_address, payload) \
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \
-            ON CONFLICT (chain_id, tx_hash, log_index) \
-            DO NOTHING",
+            ON CONFLICT (chain_id, tx_hash, log_index) DO NOTHING",
         )
         .bind(new_event.id)
         .bind(new_event.chain_id)
@@ -60,9 +70,24 @@ impl ChainEventRepository {
         .bind(new_event.deal_id.clone())
         .bind(new_event.contract_address.clone())
         .bind(new_event.payload.clone())
-        .execute(&self.pool)
+        .execute(executor)
         .await?;
 
         Ok(result.rows_affected() == 1)
+    }
+
+    pub async fn known_deal_addresses(&self, chain_id: i64) -> Result<Vec<String>, DbError> {
+        let rows = sqlx::query_scalar::<_, String>(
+            "SELECT DISTINCT payload->>'deal_address' \
+            FROM chain_events \
+            WHERE chain_id = $1 \
+                AND event_type = 'deal_created' \
+                AND payload->>'deal_address' IS NOT NULL"
+        )
+        .bind(chain_id)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows)
     }
 }

@@ -2,12 +2,13 @@ mod config;
 mod error;
 mod mapper;
 mod runner;
+mod projector;
 
 use std::error::Error;
 use std::time::Duration;
 
 use chain::ChainClient;
-use db::ChainEventRepository;
+use db::{ChainEventRepository, DealRepository};
 use sqlx::postgres::PgPoolOptions;
 
 use crate::config::IndexerConfig;
@@ -25,14 +26,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .connect(&database_url)
         .await?;
 
-    let events_repo = ChainEventRepository::new(pool);
+    let events_repo = ChainEventRepository::new(pool.clone());
+    let deals_repo = DealRepository::new(pool.clone());
 
     let indexer_config = IndexerConfig::from_env()?;
     let start_block = indexer_config.start_block;
     let poll_secs = indexer_config.poll_interval_secs;
 
     let client = ChainClient::from_env().await?;
-    let runner = IndexerRunner::new(client, indexer_config, events_repo);
+    let runner = IndexerRunner::new(client, indexer_config, pool, events_repo, deals_repo);
 
     eprintln!("indexer 4.4: start_block={start_block}, poll_secs={poll_secs:?}");
 

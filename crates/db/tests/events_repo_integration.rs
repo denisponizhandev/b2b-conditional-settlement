@@ -31,7 +31,7 @@ async fn insert_chain_event() {
 
     let event = sample_event(format!("0x{}", Uuid::new_v4().simple()));
     
-    let res = repo.insert_if_new(&event).await.expect("insert_if_new");
+    let res = repo.insert_if_new(&pool, &event).await.expect("insert_if_new");
 
     assert!(res);
 }
@@ -43,9 +43,9 @@ async fn insert_if_new_duplicate_returns_false() {
 
     let event = sample_event(format!("0x{}", Uuid::new_v4().simple()));
 
-    let res = repo.insert_if_new(&event).await.expect("insert_if_new");
+    let res = repo.insert_if_new(&pool, &event).await.expect("insert_if_new");
     assert!(res);
 
-    let res = repo.insert_if_new(&event).await.expect("insert_if_new");
+    let res = repo.insert_if_new(&pool, &event).await.expect("insert_if_new");
     assert_eq!(res, false);
 }
