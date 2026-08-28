@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use alloy::primitives::Address;
 use chain::{ChainClient, ChainError};
-use db::{ChainEventRepository, DealRepository, DbError};
+use db::{ChainEventRepository, DealRepository, DbError, IndexerCursorRepository};
 use sqlx::PgPool;
 
 use crate::config::IndexerConfig;
@@ -16,7 +16,8 @@ pub struct IndexerRunner {
     config: IndexerConfig,
     pool: PgPool,
     events_repo: ChainEventRepository,
-    deals_repo: DealRepository
+    deals_repo: DealRepository,
+    cursor_repo: IndexerCursorRepository
 }
 
 fn is_rate_limited(err: &ChainError) -> bool {
@@ -32,14 +33,16 @@ impl IndexerRunner {
         config: IndexerConfig,
         pool: PgPool,
         events_repo: ChainEventRepository,
-        deals_repo: DealRepository
+        deals_repo: DealRepository,
+        cursor_repo: IndexerCursorRepository
     ) -> Self {
         Self {
             client,
             config, 
             pool,
             events_repo,
-            deals_repo
+            deals_repo,
+            cursor_repo
         }
     }
 
@@ -223,6 +226,10 @@ impl IndexerRunner {
             total_inserted={total_inserted}, total_duplicate={total_duplicate}, \
             total_projected={total_projected}"
         );
+
+        self.cursor_repo
+            .save_next_block(chain_id, cursor)
+            .await?;
 
         Ok(cursor)
     }

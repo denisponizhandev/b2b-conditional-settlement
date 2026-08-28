@@ -8,7 +8,7 @@ use std::error::Error;
 use std::time::Duration;
 
 use chain::ChainClient;
-use db::{ChainEventRepository, DealRepository};
+use db::{ChainEventRepository, DealRepository, IndexerCursorRepository};
 use sqlx::postgres::PgPoolOptions;
 
 use crate::config::IndexerConfig;
@@ -28,24 +28,45 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let events_repo = ChainEventRepository::new(pool.clone());
     let deals_repo = DealRepository::new(pool.clone());
+    let cursor_repo = IndexerCursorRepository::new(pool.clone());
 
     let indexer_config = IndexerConfig::from_env()?;
     let start_block = indexer_config.start_block;
     let poll_secs = indexer_config.poll_interval_secs;
 
     let client = ChainClient::from_env().await?;
-    let runner = IndexerRunner::new(client, indexer_config, pool, events_repo, deals_repo);
+    let chain_id = client.config().chain_id as i64;
 
-    eprintln!("indexer 4.4: start_block={start_block}, poll_secs={poll_secs:?}");
+    let cursor = match cursor_repo.get_next_block(chain_id).await? {
+        Some(saved) => {
+            eprintln!("indexer: resume from DB next_block={saved}");
+            saved
+        }
+        None => {
+            eprintln!("indexer: no cursor row, bootstrap next_block={start_block}");
+            start_block
+        }
+    };
+
+    let runner = IndexerRunner::new(
+        client, 
+        indexer_config, 
+        pool, 
+        events_repo, 
+        deals_repo,
+        cursor_repo
+    );
+
+    eprintln!("indexer: poll_secs={poll_secs:?}");
 
     match poll_secs {
         Some(secs) if secs > 0 => {
             runner
-                .run_loop(start_block, Duration::from_secs(secs))
+                .run_loop(cursor, Duration::from_secs(secs))
                 .await?;
         }
         _ => {
-            let _cursor = runner.run_once(start_block).await?;
+            let _cursor = runner.run_once(cursor).await?;
         }
     }
 
