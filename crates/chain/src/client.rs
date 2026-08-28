@@ -96,6 +96,16 @@ impl ChainClient {
 
         Ok(deal_id)
     }
+
+    pub async fn latest_block_number(&self) -> Result<u64, ChainError> {
+        let head = self
+            .provider
+            .get_block_number()
+            .await
+            .map_err(|e| ChainError::Rpc(e.to_string()))?;
+
+        Ok(head)
+    }
 }
 
 #[cfg(test)]

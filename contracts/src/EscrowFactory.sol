@@ -33,13 +33,17 @@ contract EscrowFactory is IEscrowFactory, AccessControl {
         address _payee, 
         IERC20 _token, 
         uint16 _retentionBps, 
-        uint256[] memory _milestoneAmounts
+        uint256[] memory _milestoneAmounts,
+        bytes32 intentId
     ) public onlyRole(DEAL_CREATOR_ROLE) returns (IEscrowDeal deal) {
 
         require(_admin != address(0), "EscrowDeal: zero address");
         
+        require(intentId != 0x0000000000000000000000000000000000000000000000000000000000000000, "EscrowDeal: zero bytes");
+        require(address(deals[intentId]) == address(0), "EscrowDeal: intent already used");
+        
+        bytes32 dealId = intentId;
         dealCount++;
-        bytes32 dealId = keccak256(abi.encode(dealCount));
 
         deal = new EscrowDeal(
             _admin,

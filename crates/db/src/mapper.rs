@@ -41,16 +41,17 @@ pub fn row_to_milestone(row: &PgRow) -> Result<Milestone, DbError> {
     ))
 }
 
-pub fn row_to_deal_fields(row: &PgRow) -> Result<(Uuid, DealStatus, Uuid, Uuid, Option<String>), DbError> {
+pub fn row_to_deal_fields(row: &PgRow) -> Result<(Uuid, DealStatus, String, Uuid, Uuid, Option<String>), DbError> {
     let id: Uuid = row.try_get("id")?;
     let status: String = row.try_get("status")?;
+    let intent_id: String = row.try_get("intent_id")?;
     let status = parse_status(&status)?;
     let payer_org_id: Uuid = row.try_get("payer_org_id")?;
     let payee_org_id: Uuid = row.try_get("payee_org_id")?;
 
     let chain_address: Option<String> = row.try_get("chain_address")?;
 
-    Ok((id, status, payer_org_id, payee_org_id, chain_address))
+    Ok((id, status, intent_id, payer_org_id, payee_org_id, chain_address))
 }
 
 #[cfg(test)]

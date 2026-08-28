@@ -1451,6 +1451,7 @@ version = "0.1.0"
 dependencies = [
  "domain",
  "dotenvy",
+ "serde_json",
  "sqlx",
  "thiserror",
  "tokio",
@@ -2356,6 +2357,21 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "indexer"
+version = "0.1.0"
+dependencies = [
+ "alloy",
+ "chain",
+ "db",
+ "dotenvy",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "uuid",
 ]
 
 [[package]]

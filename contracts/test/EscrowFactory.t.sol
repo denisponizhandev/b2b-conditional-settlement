@@ -37,11 +37,11 @@ contract EscrowFactoryTest is Test {
         amounts[0] = MILESTONE_0;
     }
 
-    function _dealIdForNonce(uint256 nonce) internal pure returns (bytes32) {
-        return keccak256(abi.encode(nonce));
+    function _dealIdForNonce(string memory text) internal pure returns (bytes32) {
+        return keccak256(abi.encode(text));
     }
 
-    function _createDeal(uint256[] memory amounts) internal returns (IEscrowDeal deal) {
+    function _createDeal(uint256[] memory amounts, bytes32 intentId) internal returns (IEscrowDeal deal) {
         vm.prank(dealCreator);
         deal = factory.createDeal(
             admin,
@@ -50,7 +50,8 @@ contract EscrowFactoryTest is Test {
             payee,
             token,
             0,
-            amounts
+            amounts,
+            intentId
         );
     }
 
@@ -65,12 +66,12 @@ contract EscrowFactoryTest is Test {
     }
 
     function test_createDeal_success() public {
-        IEscrowDeal deal = _createDeal(_twoMilestoneAmounts());
+        IEscrowDeal deal = _createDeal(_twoMilestoneAmounts(), _dealIdForNonce("1"));
 
         assertTrue(address(deal) != address(0));
         assertEq(factory.dealCount(), 1);
 
-        bytes32 dealId = _dealIdForNonce(1);
+        bytes32 dealId = _dealIdForNonce("1");
         assertEq(address(factory.deals(dealId)), address(deal));
 
         assertEq(deal.payer(), payer);
@@ -82,14 +83,14 @@ contract EscrowFactoryTest is Test {
     }
 
     function test_createDeal_two_deals_have_different_addresses() public {
-        IEscrowDeal deal1 = _createDeal(_singleMilestoneAmounts());
-        IEscrowDeal deal2 = _createDeal(_twoMilestoneAmounts());
+        IEscrowDeal deal1 = _createDeal(_singleMilestoneAmounts(), _dealIdForNonce("1"));
+        IEscrowDeal deal2 = _createDeal(_twoMilestoneAmounts(), _dealIdForNonce("2"));
 
         assertTrue(address(deal1) != address(deal2));
         assertEq(factory.dealCount(), 2);
 
-        assertEq(address(factory.deals(_dealIdForNonce(1))), address(deal1));
-        assertEq(address(factory.deals(_dealIdForNonce(2))), address(deal2));
+        assertEq(address(factory.deals(_dealIdForNonce("1"))), address(deal1));
+        assertEq(address(factory.deals(_dealIdForNonce("2"))), address(deal2));
     }
 
     function test_createDeal_reverts_not_deal_creator() public {
@@ -102,7 +103,8 @@ contract EscrowFactoryTest is Test {
             payee,
             token,
             0,
-            _singleMilestoneAmounts()
+            _singleMilestoneAmounts(),
+            _dealIdForNonce("1")
         );
     }
 
@@ -116,12 +118,13 @@ contract EscrowFactoryTest is Test {
             payee,
             token,
             0,
-            _singleMilestoneAmounts()
+            _singleMilestoneAmounts(),
+            _dealIdForNonce("1")
         );
     }
 
     function test_createDeal_emits_DealCreated() public {
-        bytes32 expectedDealId = _dealIdForNonce(1);
+        bytes32 expectedDealId = _dealIdForNonce("1");
 
         vm.expectEmit(true, false, false, true);
         emit IEscrowFactory.DealCreated(
@@ -136,11 +139,11 @@ contract EscrowFactoryTest is Test {
             0
         );
 
-        _createDeal(_singleMilestoneAmounts());
+        _createDeal(_singleMilestoneAmounts(), _dealIdForNonce("1"));
     }
 
     function test_full_flow_via_factory() public {
-        IEscrowDeal deal = _createDeal(_twoMilestoneAmounts());
+        IEscrowDeal deal = _createDeal(_twoMilestoneAmounts(), _dealIdForNonce("1"));
 
         _fundDeal(deal, TOTAL_TWO_MILESTONES);
 
